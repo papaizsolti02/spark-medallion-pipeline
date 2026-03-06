@@ -1,7 +1,3 @@
-data/raw/*
-data/bronze/*
-data/silver/*
-data/gold/*
 *.parquet
 *.csv
 *.json
