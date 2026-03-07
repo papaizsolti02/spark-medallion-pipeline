@@ -49,7 +49,6 @@ try {
     Write-Host "Activate the environment using:" -ForegroundColor White
     Write-Host "    .\venv\Scripts\activate" -ForegroundColor Yellow
     Write-Host ""
-
 }
 catch {
     Log-Error "Environment setup failed."
