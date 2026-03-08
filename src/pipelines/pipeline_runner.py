@@ -10,6 +10,9 @@ def run_pipeline():
     spark = create_spark(
         "spark-medallion-pipeline",
     )
+    
+    print("Spark master:", spark.sparkContext.master)
+    print("Parallelism:", spark.sparkContext.defaultParallelism)
 
     raw_bronze(spark, config)
 

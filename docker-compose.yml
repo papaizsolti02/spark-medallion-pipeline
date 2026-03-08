@@ -2,56 +2,13 @@ version: "3.8"
 
 services:
 
-  spark-master:
-    image: apache/spark:3.5.0
-    container_name: spark-master
-    volumes:
-      - ./data:/app/data
-    hostname: spark-master
-    command: >
-      bash -c "/opt/spark/sbin/start-master.sh && tail -f /dev/null"
-    ports:
-      - "7077:7077"
-      - "8080:8080"
-
-  spark-worker-1:
-    image: apache/spark:3.5.0
-    container_name: spark-worker-1
-    volumes:
-      - ./data:/app/data
-    depends_on:
-      - spark-master
-    command: >
-      bash -c "/opt/spark/sbin/start-worker.sh spark://spark-master:7077
-      --cores 4
-      --memory 4g
-      && tail -f /dev/null"
-    ports:
-      - "8081:8081"
-
-  spark-worker-2:
-    image: apache/spark:3.5.0
-    container_name: spark-worker-2
-    volumes:
-      - ./data:/app/data
-    depends_on:
-      - spark-master
-    command: >
-      bash -c "/opt/spark/sbin/start-worker.sh spark://spark-master:7077
-      --cores 4
-      --memory 4g
-      && tail -f /dev/null"
-    ports:
-      - "8082:8081"
-
-  spark-pipeline:
+  spark:
     build: .
-    container_name: spark-pipeline
+    container_name: spark-medallion
     volumes:
       - .:/app
-      - ./data:/app/data
     environment:
-      - SPARK_MASTER=spark://spark-master:7077
-    depends_on:
-      - spark-master
-    command: tail -f /dev/null
+      - SPARK_MASTER=local[*]
+    ports:
+      - "4040:4040"
+    command: /app/docker-entrypoint.sh
