@@ -9,7 +9,6 @@ def run_pipeline():
 
     spark = create_spark(
         "spark-medallion-pipeline",
-        config["spark"]["shuffle_partitions"]
     )
 
     raw_bronze(spark, config)

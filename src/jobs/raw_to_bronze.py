@@ -8,12 +8,14 @@ def run(
     config: dict):
 
     raw_path = config["raw"]["path"]
-    bronze_path = config["bronze"]["path"]
+    bronze_path = config["bronze"]["path"] + "/taxi_trips"
     partition_col = config["bronze"]["partition_column"]
 
     df = spark.read.parquet(raw_path)
     
     print("Data read!")
+    
+    print("Partitions:", df.rdd.getNumPartitions())
 
     # data quality checks
     df = validate_taxi_data(df)
@@ -27,7 +29,7 @@ def run(
         .withColumn("source_file", input_file_name())
     )
 
-    df = df.repartition(64, partition_col)
+    df.repartition(48, partition_col)
 
     print("Data quality checks passed, writing to bronze...")
 
@@ -36,5 +38,6 @@ def run(
         .mode("overwrite")
         .partitionBy(partition_col)
         .option("compression", "snappy")
+        .option("maxRecordsPerFile", 5_000_000)
         .parquet(bronze_path)
     )

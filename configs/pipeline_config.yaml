@@ -1,0 +1,12 @@
+raw:
+  path: /app/data/raw
+
+bronze:
+  path: /app/data/bronze
+  partition_column: pickup_month
+
+silver:
+  path: /app/data/silver
+
+gold:
+  path: /app/data/gold

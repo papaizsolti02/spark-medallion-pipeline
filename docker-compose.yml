@@ -23,8 +23,8 @@ services:
       - spark-master
     command: >
       bash -c "/opt/spark/sbin/start-worker.sh spark://spark-master:7077
-      --cores 8
-      --memory 5g
+      --cores 4
+      --memory 4g
       && tail -f /dev/null"
     ports:
       - "8081:8081"
@@ -38,8 +38,8 @@ services:
       - spark-master
     command: >
       bash -c "/opt/spark/sbin/start-worker.sh spark://spark-master:7077
-      --cores 8
-      --memory 5g
+      --cores 4
+      --memory 4g
       && tail -f /dev/null"
     ports:
       - "8082:8081"

@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession
 def create_spark(
     app_name: str = "spark-medallion-pipeline",
     shuffle_partitions: int = 64,
-    executor_instances: int = 4,
+    executor_instances: int = 6,
     cores: int = 2,
     memory: str = "2g",
     enable_arrow: bool = True,
