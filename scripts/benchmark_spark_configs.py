@@ -38,27 +38,60 @@ def main() -> None:
         description="Benchmark Spark configuration combinations for raw->bronze ingestion."
     )
     parser.add_argument("--config", default="configs/pipeline_config.yaml")
-    parser.add_argument("--shuffle-partitions", default="12,24")
-    parser.add_argument("--coalesce", default="4,8")
-    parser.add_argument("--driver-memory", default="8g,10g")
-    parser.add_argument("--executor-memory", default="3g")
-    parser.add_argument("--cores", default="3,4")
-    parser.add_argument("--max-partition-bytes", default="256MB")
-    parser.add_argument("--compression", default="none,snappy")
-    parser.add_argument("--file-limit", type=int, default=2)
-    parser.add_argument("--output", default="data/benchmark/spark_config_benchmark.csv")
+    parser.add_argument("--shuffle-partitions", default=None)
+    parser.add_argument("--coalesce", default=None)
+    parser.add_argument("--driver-memory", default=None)
+    parser.add_argument("--executor-memory", default=None)
+    parser.add_argument("--cores", default=None)
+    parser.add_argument("--max-partition-bytes", default=None)
+    parser.add_argument("--compression", default=None)
+    parser.add_argument(
+        "--processing-mode",
+        default=None,
+        choices=["full_batch", "file_loop"],
+        help="Bronze ingestion mode. full_batch reads all selected files in one Spark job.",
+    )
+    parser.add_argument(
+        "--file-limit",
+        type=int,
+        default=None,
+        help="Optional cap on number of files. Omit to use all files.",
+    )
+    parser.add_argument("--output", default=None)
     args = parser.parse_args()
 
     config = load_config(args.config)
+    benchmark_config = config.get("benchmark", {})
+
+    shuffle_partitions = args.shuffle_partitions or str(
+        benchmark_config.get("shuffle_partitions", "12,24")
+    )
+    coalesce = args.coalesce or str(benchmark_config.get("coalesce", "4,8"))
+    driver_memory = args.driver_memory or str(benchmark_config.get("driver_memory", "8g,10g"))
+    executor_memory = args.executor_memory or str(benchmark_config.get("executor_memory", "3g"))
+    cores = args.cores or str(benchmark_config.get("cores", "3,4"))
+    max_partition_bytes = args.max_partition_bytes or str(
+        benchmark_config.get("max_partition_bytes", "256MB")
+    )
+    compression = args.compression or str(benchmark_config.get("compression", "none,snappy"))
+    processing_mode = args.processing_mode or str(
+        benchmark_config.get("processing_mode", "full_batch")
+    )
+    file_limit = args.file_limit
+    if file_limit is None and benchmark_config.get("file_limit") is not None:
+        file_limit = int(benchmark_config.get("file_limit"))
+    output_path_raw = args.output or str(
+        benchmark_config.get("output", "data/benchmark/spark_config_benchmark.csv")
+    )
 
     grid = {
-        "shuffle_partitions": parse_int_list(args.shuffle_partitions),
-        "coalesce_n": parse_int_list(args.coalesce),
-        "driver_memory": parse_str_list(args.driver_memory),
-        "executor_memory": parse_str_list(args.executor_memory),
-        "cores": parse_int_list(args.cores),
-        "max_partition_bytes": parse_str_list(args.max_partition_bytes),
-        "compression": parse_str_list(args.compression),
+        "shuffle_partitions": parse_int_list(shuffle_partitions),
+        "coalesce_n": parse_int_list(coalesce),
+        "driver_memory": parse_str_list(driver_memory),
+        "executor_memory": parse_str_list(executor_memory),
+        "cores": parse_int_list(cores),
+        "max_partition_bytes": parse_str_list(max_partition_bytes),
+        "compression": parse_str_list(compression),
     }
 
     trials = list(build_trials(grid))
@@ -85,9 +118,10 @@ def main() -> None:
             raw_result = raw_to_bronze(
                 spark,
                 config,
+                processing_mode=processing_mode,
                 coalesce_n=int(trial["coalesce_n"]),
                 compression=str(trial["compression"]),
-                file_limit=args.file_limit,
+                file_limit=file_limit,
                 count_rows=False,
                 logger=logger,
             )
@@ -113,7 +147,7 @@ def main() -> None:
         )
         logger.info("Trial %s finished in %ss (%s)", idx, elapsed, status)
 
-    output_path = Path(args.output)
+    output_path = Path(output_path_raw)
     ensure_parent(output_path)
 
     with output_path.open("w", newline="", encoding="utf-8") as handle:

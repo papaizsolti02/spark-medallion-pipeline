@@ -25,3 +25,15 @@ bronze_job:
   max_records_per_file: 5000000
   file_limit: null
   count_rows: false
+
+benchmark:
+  shuffle_partitions: "12,24"
+  coalesce: "4,8"
+  driver_memory: "8g,10g"
+  executor_memory: "3g"
+  cores: "3,4"
+  max_partition_bytes: "256MB"
+  compression: "none,snappy"
+  processing_mode: full_batch
+  file_limit: null
+  output: data/benchmark/spark_config_benchmark.csv
