@@ -133,12 +133,26 @@ def main() -> None:
             logger.exception("Trial failed")
         finally:
             if spark is not None:
-                spark.stop()
+                try:
+                    spark.stop()
+                    logger.info("Spark session stopped successfully")
+                except Exception as stop_exc:  # noqa: BLE001
+                    logger.warning("Failed to stop Spark session cleanly: %s", stop_exc)
+                    # JVM may have crashed, force cleanup
+                    try:
+                        import os
+                        import signal
+                        # Give it a moment then continue
+                        import time
+                        time.sleep(2)
+                    except Exception:  # noqa: BLE001
+                        pass
 
         elapsed = round(perf_counter() - trial_start, 2)
         results.append(
             {
                 **trial,
+                "processing_mode": processing_mode,
                 "status": status,
                 "seconds": elapsed,
                 "files_processed": files_processed,
@@ -147,7 +161,12 @@ def main() -> None:
         )
         logger.info("Trial %s finished in %ss (%s)", idx, elapsed, status)
 
+    # Create separate CSV files for different processing modes
     output_path = Path(output_path_raw)
+    stem = output_path.stem  # e.g., 'spark_config_benchmark'
+    suffix = output_path.suffix  # e.g., '.csv'
+    output_path = output_path.parent / f"{stem}_{processing_mode}{suffix}"
+    
     ensure_parent(output_path)
 
     with output_path.open("w", newline="", encoding="utf-8") as handle:

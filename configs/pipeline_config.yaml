@@ -27,11 +27,11 @@ bronze_job:
   count_rows: false
 
 benchmark:
-  shuffle_partitions: "12,24"
-  coalesce: "4,8"
-  driver_memory: "8g,10g"
-  executor_memory: "3g"
-  cores: "3,4"
+  shuffle_partitions: "12"
+  coalesce: "8,12,16"
+  driver_memory: "10g"
+  executor_memory: "3g,4g"
+  cores: "3"
   max_partition_bytes: "256MB"
   compression: "none,snappy"
   processing_mode: full_batch
