@@ -6,8 +6,10 @@ def create_spark(
     app_name: str = "spark-medallion-pipeline",
     shuffle_partitions: int = 24,
     executor_instances: int = 4,
-    cores: int = 4,
+    cores: int = 3,
     memory: str = "3g",
+    driver_memory: str = "8g",
+    max_partition_bytes: str = "256MB",
     enable_arrow: bool = True,
     adaptive_execution: bool = True,
     coalesce_partitions: bool = True
@@ -29,7 +31,7 @@ def create_spark(
         .config("spark.executor.memoryOverhead", "512m")
 
         # driver
-        .config("spark.driver.memory", "8g")
+        .config("spark.driver.memory", driver_memory)
 
         # shuffle tuning
         .config("spark.sql.shuffle.partitions", shuffle_partitions)
@@ -45,7 +47,7 @@ def create_spark(
 
         # parquet tuning
         .config("spark.sql.parquet.enableDictionary", "false")
-        .config("spark.sql.files.maxPartitionBytes", "256MB")
+        .config("spark.sql.files.maxPartitionBytes", max_partition_bytes)
 
         # better shuffle handling
         .config("spark.sql.adaptive.skewJoin.enabled", "true")

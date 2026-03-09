@@ -1,9 +1,8 @@
 *.parquet
-*.csv
 *.json
 venv
 __pycache__/
 *.pyc
-./data/bronze/taxi_trips
-./data/silver/taxi_trips
-./data/gold/taxi_trips
+data/bronze/taxi_trips/*
+data/silver/taxi_trips/*
+data/gold/taxi_trips/*

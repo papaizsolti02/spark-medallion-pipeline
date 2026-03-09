@@ -10,3 +10,18 @@ silver:
 
 gold:
   path: /app/data/gold
+
+spark:
+  shuffle_partitions: 12
+  executor_cores: 3
+  executor_memory: 3g
+  driver_memory: 10g
+  max_partition_bytes: 256MB
+
+bronze_job:
+  processing_mode: full_batch
+  coalesce_n: 8
+  compression: none
+  max_records_per_file: 5000000
+  file_limit: null
+  count_rows: false
