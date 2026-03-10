@@ -1,0 +1,13 @@
+shuffle_partitions,coalesce_n,driver_memory,executor_memory,cores,max_partition_bytes,compression,processing_mode,status,seconds,files_processed,error
+12,8,10g,3g,3,256MB,none,full_batch,ok,251.81,2,
+12,8,10g,3g,3,256MB,snappy,full_batch,ok,318.8,2,
+12,8,10g,4g,3,256MB,none,full_batch,ok,316.63,2,
+12,8,10g,4g,3,256MB,snappy,full_batch,ok,469.48,2,
+12,12,10g,3g,3,256MB,none,full_batch,ok,236.25,2,
+12,12,10g,3g,3,256MB,snappy,full_batch,ok,230.4,2,
+12,12,10g,4g,3,256MB,none,full_batch,ok,320.48,2,
+12,12,10g,4g,3,256MB,snappy,full_batch,ok,329.1,2,
+12,16,10g,3g,3,256MB,none,full_batch,ok,354.7,2,
+12,16,10g,3g,3,256MB,snappy,full_batch,ok,363.5,2,
+12,16,10g,4g,3,256MB,none,full_batch,ok,369.43,2,
+12,16,10g,4g,3,256MB,snappy,full_batch,ok,441.61,2,
