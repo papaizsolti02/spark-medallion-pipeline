@@ -1,3 +1,5 @@
+"""Pipeline entry point."""
+
 from src.pipelines.pipeline_runner import run_pipeline
 
 if __name__ == "__main__":
