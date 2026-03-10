@@ -1,0 +1,39 @@
+raw:
+  path: /app/data/raw
+
+bronze:
+  path: /app/data/bronze
+  partition_column: pickup_month
+
+silver:
+  path: /app/data/silver
+
+gold:
+  path: /app/data/gold
+
+spark:
+  shuffle_partitions: 12
+  executor_cores: 3
+  executor_memory: 2g
+  driver_memory: 6g
+  max_partition_bytes: 256MB
+
+bronze_job:
+  processing_mode: file_loop
+  coalesce_n: 8
+  compression: snappy
+  max_records_per_file: 5000000
+  file_limit: null
+  count_rows: false
+
+benchmark:
+  shuffle_partitions: "12,16,24"
+  coalesce: "8,12"
+  driver_memory: "10g"
+  executor_memory: "3g,4g"
+  cores: "3,4"
+  max_partition_bytes: "128MB,256MB"
+  compression: "none,snappy"
+  processing_mode: full_batch
+  file_limit: null
+  output: data/benchmark/spark_config_benchmark.csv

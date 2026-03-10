@@ -1,0 +1,13 @@
+shuffle_partitions,coalesce_n,driver_memory,executor_memory,cores,max_partition_bytes,compression,processing_mode,status,seconds,files_processed,error
+12,8,10g,3g,3,256MB,none,file_loop,ok,235.25,2,
+12,8,10g,3g,3,256MB,snappy,file_loop,ok,250.26,2,
+12,8,10g,4g,3,256MB,none,file_loop,ok,233.49,2,
+12,8,10g,4g,3,256MB,snappy,file_loop,ok,268.99,2,
+12,12,10g,3g,3,256MB,none,file_loop,ok,348.55,2,
+12,12,10g,3g,3,256MB,snappy,file_loop,ok,214.38,2,
+12,12,10g,4g,3,256MB,none,file_loop,ok,249.13,2,
+12,12,10g,4g,3,256MB,snappy,file_loop,ok,280.41,2,
+12,16,10g,3g,3,256MB,none,file_loop,ok,330.72,2,
+12,16,10g,3g,3,256MB,snappy,file_loop,ok,403.51,2,
+12,16,10g,4g,3,256MB,none,file_loop,failed,2117.15,0,An error occurred while calling o1209.parquet
+12,16,10g,4g,3,256MB,snappy,file_loop,failed,0.02,0,[Errno 111] Connection refused
