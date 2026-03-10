@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+
+  spark:
+    build: .
+    container_name: spark-medallion
+    volumes:
+      - .:/app
+    environment:
+      - SPARK_MASTER=local[*]
+    ports:
+      - "4040:4040"
+    command: /app/docker-entrypoint.sh
