@@ -6,9 +6,9 @@ from typing import Any, Dict, List, Optional
 
 from pyspark.sql import DataFrame, SparkSession
 
-from src.jobs.bronze_transformers import apply_derived_columns
-from src.jobs.bronze_writers import get_write_mode, write_bronze
-from src.jobs.file_discovery import get_file_paths, list_parquet_files
+from src.jobs.bronze.bronze_transformers import apply_derived_columns
+from src.jobs.bronze.bronze_writers import get_write_mode, write_bronze
+from src.jobs.bronze.file_discovery import get_file_paths, list_parquet_files
 from src.validation.data_quality import validate_taxi_data
 
 

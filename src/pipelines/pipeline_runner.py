@@ -6,7 +6,7 @@ from pyspark.sql import SparkSession
 
 from src.core.config_loader import load_config
 from src.core.spark import create_spark
-from src.jobs.raw_to_bronze import run as raw_to_bronze
+from src.jobs.bronze.raw_to_bronze import run as raw_to_bronze
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
