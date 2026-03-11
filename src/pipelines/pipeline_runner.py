@@ -53,7 +53,19 @@ def run_pipeline() -> None:
         logger=logger,
     )
 
+    # Run Silver in a fresh Spark app to avoid long-lived JVM memory buildup
+    # from the Bronze stage in local containerized execution.
+    spark.stop()
+
     if bool(silver_job_config.get("enabled", False)):
+        spark = create_spark(
+            app_name="spark-medallion-pipeline-silver",
+            shuffle_partitions=int(spark_config.get("shuffle_partitions", 24)),
+            cores=int(spark_config.get("executor_cores", 3)),
+            memory=str(spark_config.get("executor_memory", "3g")),
+            driver_memory=str(spark_config.get("driver_memory", "8g")),
+            max_partition_bytes=str(spark_config.get("max_partition_bytes", "256MB")),
+        )
         bronze_to_silver(
             spark,
             config,

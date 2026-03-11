@@ -50,9 +50,13 @@ def deduplicate(
     """Deduplicate records using key set and selected strategy.
 
     Supported strategies:
+    - none: skip deduplication
     - drop_duplicates: hash-based dedup (lower memory footprint)
     - window_keep_latest: keep latest row by dedup_order_col (heavier sort)
     """
+    if strategy == "none":
+        return dataframe
+
     keys = [k for k in dedup_keys if k in dataframe.columns]
     if not keys:
         return dataframe
