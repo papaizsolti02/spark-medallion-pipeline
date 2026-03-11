@@ -7,6 +7,7 @@ from pyspark.sql import SparkSession
 from src.core.config_loader import load_config
 from src.core.spark import create_spark
 from src.jobs.bronze.raw_to_bronze import run as raw_to_bronze
+from src.jobs.silver.bronze_to_silver import run as bronze_to_silver
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -26,6 +27,7 @@ def run_pipeline() -> None:
     config: Dict[str, Any] = load_config("configs/pipeline_config.yaml")
     spark_config: Dict[str, Any] = config.get("spark", {})
     bronze_job_config: Dict[str, Any] = config.get("bronze_job", {})
+    silver_job_config: Dict[str, Any] = config.get("silver_job", {})
 
     spark: SparkSession = create_spark(
         app_name="spark-medallion-pipeline",
@@ -50,5 +52,18 @@ def run_pipeline() -> None:
         count_rows=bool(bronze_job_config.get("count_rows", False)),
         logger=logger,
     )
+
+    if bool(silver_job_config.get("enabled", False)):
+        bronze_to_silver(
+            spark,
+            config,
+            processing_mode=str(silver_job_config.get("processing_mode", "full_batch")),
+            coalesce_n=int(silver_job_config.get("coalesce_n", 16)),
+            compression=str(silver_job_config.get("compression", "snappy")),
+            max_records_per_file=int(silver_job_config.get("max_records_per_file", 5_000_000)),
+            file_limit=silver_job_config.get("file_limit"),
+            count_rows=bool(silver_job_config.get("count_rows", False)),
+            logger=logger,
+        )
 
     spark.stop()

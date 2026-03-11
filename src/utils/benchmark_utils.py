@@ -2,7 +2,7 @@
 
 import json
 from itertools import product
-from typing import Any, List
+from typing import Any, Dict, List
 
 
 def parse_int_list(value: str) -> List[int]:

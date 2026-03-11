@@ -12,14 +12,42 @@ gold:
   path: /app/data/gold
 
 spark:
-  shuffle_partitions: 12
-  executor_cores: 3
+  shuffle_partitions: 48
+  executor_cores: 2
   executor_memory: 2g
-  driver_memory: 6g
-  max_partition_bytes: 256MB
+  driver_memory: 8g
+  max_partition_bytes: 128MB
 
 bronze_job:
   processing_mode: file_loop
+  coalesce_n: 8
+  compression: snappy
+  max_records_per_file: 5000000
+  file_limit: null
+  count_rows: false
+
+silver_job:
+  enabled: true
+  source_path: /app/data/bronze/taxi_trips
+  target_path: /app/data/silver/taxi_trips
+  processing_mode: file_loop
+  partition_column: pickup_month
+  pickup_ts_col: pickup_datetime
+  dropoff_ts_col: dropoff_datetime
+  distance_col: trip_miles
+  fare_col: base_passenger_fare
+  source_duration_col: trip_time
+  max_duration_delta_sec: 900
+  critical_not_null: pickup_datetime,dropoff_datetime,pickup_month,trip_miles
+  dedup_keys: hvfhs_license_num,pickup_datetime,dropoff_datetime,PULocationID,DOLocationID
+  dedup_order_col: ingestion_timestamp
+  dedup_strategy: drop_duplicates
+  min_trip_miles: 0.01
+  max_trip_miles: 200
+  min_trip_seconds: 60
+  max_trip_seconds: 14400
+  min_fare_amount: 0
+  max_fare_amount: 1000
   coalesce_n: 8
   compression: snappy
   max_records_per_file: 5000000
@@ -37,3 +65,15 @@ benchmark:
   processing_mode: full_batch
   file_limit: null
   output: data/benchmark/spark_config_benchmark.csv
+
+silver_benchmark:
+  shuffle_partitions: "12,24"
+  coalesce: "8,16"
+  driver_memory: "6g"
+  executor_memory: "2g,3g"
+  cores: "2,3"
+  max_partition_bytes: "128MB,256MB"
+  compression: "snappy,none"
+  processing_mode: full_batch
+  file_limit: 2
+  output: data/benchmark/silver_config_benchmark.csv

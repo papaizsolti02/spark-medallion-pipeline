@@ -62,10 +62,16 @@ View Spark UI at http://localhost:4040
 
 ### Running Benchmarks
 
-Execute benchmark suite to evaluate configuration options:
+Execute Bronze benchmark suite:
 
 ```bash
 docker exec spark-medallion python3 -m scripts.benchmark_spark_configs
+```
+
+Execute Silver benchmark suite:
+
+```bash
+docker exec spark-medallion python3 -m scripts.benchmark_silver_configs
 ```
 
 Options:
@@ -85,10 +91,18 @@ spark-medallion-pipeline/
 │   │   ├── config_loader.py         Configuration management
 │   │   └── spark.py                  Spark factory with tuned settings
 │   ├── jobs/
-│   │   ├── raw_to_bronze.py         Main ingestion orchestrator
-│   │   ├── bronze_writers.py         Write operations
-│   │   ├── bronze_transformers.py   Data transformations
-│   │   └── file_discovery.py        File listing utilities
+│   │   ├── bronze/
+│   │   │   ├── raw_to_bronze.py        Bronze ingestion orchestrator
+│   │   │   ├── bronze_writers.py       Bronze write operations
+│   │   │   ├── bronze_transformers.py  Bronze feature columns
+│   │   │   └── file_discovery.py       Bronze file listing utilities
+│   │   ├── silver/
+│   │   │   ├── bronze_to_silver.py     Silver orchestration job
+│   │   │   ├── silver_readers.py       Silver read utilities
+│   │   │   ├── silver_transformers.py  Silver feature engineering
+│   │   │   ├── silver_validators.py    Silver quality + dedup rules
+│   │   │   └── silver_writers.py       Silver write utilities
+│   │   └── gold/
 │   ├── pipelines/
 │   │   └── pipeline_runner.py       Pipeline orchestration
 │   ├── utils/
@@ -100,7 +114,8 @@ spark-medallion-pipeline/
 │       └── data_quality.py          Validation rules
 ├── scripts/
 │   ├── run_pipeline.py              Pipeline entry point
-│   └── benchmark_spark_configs.py   Benchmark orchestrator
+│   ├── benchmark_spark_configs.py   Bronze benchmark orchestrator
+│   └── benchmark_silver_configs.py  Silver benchmark orchestrator
 ├── configs/
 │   └── pipeline_config.yaml         Pipeline configuration
 ├── data/
@@ -122,8 +137,8 @@ Pipeline behavior is controlled through `configs/pipeline_config.yaml`:
 spark:
   shuffle_partitions: 12           # Shuffle operation parallelism
   executor_cores: 3                # Cores per executor
-  executor_memory: 3g              # Executor heap memory
-  driver_memory: 10g               # Driver heap memory
+  executor_memory: 2g              # Executor heap memory
+  driver_memory: 6g                # Driver heap memory
   max_partition_bytes: 256MB       # Max bytes per partition (Parquet read)
 ```
 
@@ -132,11 +147,31 @@ spark:
 ```yaml
 bronze_job:
   processing_mode: file_loop       # file_loop or full_batch
-  coalesce_n: 12                   # Partitions after coalesce
+  coalesce_n: 8                    # Partitions after coalesce
   compression: snappy              # none or snappy
   max_records_per_file: 5000000    # Records per output partition file
   file_limit: null                 # Process all files (or limit to N)
   count_rows: false                # Count records during ingestion
+```
+
+### Silver Job Configuration
+
+```yaml
+silver_job:
+  enabled: true
+  source_path: /app/data/bronze/taxi_trips
+  target_path: /app/data/silver/taxi_trips
+  processing_mode: file_loop       # recommended locally; full_batch is heavier
+  partition_column: pickup_month
+  pickup_ts_col: pickup_datetime
+  dropoff_ts_col: dropoff_datetime
+  distance_col: trip_miles
+  fare_col: base_passenger_fare
+  critical_not_null: pickup_datetime,dropoff_datetime,pickup_month,trip_miles
+  dedup_keys: hvfhs_license_num,pickup_datetime,dropoff_datetime,PULocationID,DOLocationID
+  dedup_order_col: ingestion_timestamp
+  coalesce_n: 8
+  compression: snappy
 ```
 
 ### Benchmark Configuration
@@ -152,6 +187,17 @@ benchmark:
   compression: "none,snappy"
   processing_mode: full_batch
   output: data/benchmark/spark_config_benchmark.csv
+
+silver_benchmark:
+  shuffle_partitions: "12,24"
+  coalesce: "8,16"
+  driver_memory: "6g"
+  executor_memory: "2g,3g"
+  cores: "2,3"
+  max_partition_bytes: "128MB,256MB"
+  compression: "snappy,none"
+  processing_mode: full_batch
+  output: data/benchmark/silver_config_benchmark.csv
 ```
 
 ## Processing Modes
@@ -367,8 +413,9 @@ gold:
 ```
 
 **Spark Configuration** (`src/core/spark.py`):
-- Driver memory: `8GB`
-- Shuffle partitions: `24`
+- Driver memory: `6GB`
+- Executor memory: `2GB`
+- Shuffle partitions: `12`
 - Max partition bytes: `256MB`
 - Adaptive execution: `enabled`
 

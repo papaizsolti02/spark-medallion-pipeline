@@ -1,0 +1,2 @@
+shuffle_partitions,coalesce_n,driver_memory,executor_memory,cores,max_partition_bytes,compression,processing_mode,status,seconds,partitions_processed,error
+12,8,6g,2g,2,128MB,snappy,file_loop,ok,270.13,1,
